@@ -38,10 +38,21 @@ export class RoomGateway {
   @SubscribeMessage('joinRoom')
   handleJoinRoom(socket: Socket, payload) {
     const { nickname, room, toLeaveRoom } = payload;
+    console.log(payload);
     socket.leave(toLeaveRoom);
     this.chatGateway.server.emit('notice', {
       message: `${nickname}님이 ${room}방에 입장했습니다`,
     });
     socket.join(room);
+  }
+
+  @SubscribeMessage('message') // message evnet 구독
+  handleMessageToRoom(socket: Socket, payload: any) {
+    const { message, nickname, room } = payload;
+    console.log(message);
+    // 접속한 클라이언트들에게 메시지 전송
+    socket.broadcast.to(room).emit('message', {
+      message: `${nickname}: ${message}`,
+    });
   }
 }
